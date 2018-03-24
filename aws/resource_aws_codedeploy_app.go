@@ -26,6 +26,13 @@ func resourceAwsCodeDeployApp() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"platform": &schema.Schema{
+				Type: schema.TypeString,
+				Required: false,
+				ForceNew: true,
+				Default: "Compute"
+			}
+
 			// The unique ID is set by AWS on create.
 			"unique_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -40,10 +47,12 @@ func resourceAwsCodeDeployAppCreate(d *schema.ResourceData, meta interface{}) er
 	conn := meta.(*AWSClient).codedeployconn
 
 	application := d.Get("name").(string)
-	log.Printf("[DEBUG] Creating CodeDeploy application %s", application)
+	platform := d.Get("platform").(string)
+	log.Printf("[DEBUG] Creating CodeDeploy application %s for platform %s", (application, platform))
 
 	resp, err := conn.CreateApplication(&codedeploy.CreateApplicationInput{
 		ApplicationName: aws.String(application),
+		ComputePlatform: aws.String(platform),
 	})
 	if err != nil {
 		return err
